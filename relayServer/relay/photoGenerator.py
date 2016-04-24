@@ -24,7 +24,8 @@ def get_timestamp():
 
 def call_camera(img_dir):
 	extension = getattr(config,'EXTENSION')
-	cap = cv2.VideoCapture(0)
+	# 0为先系统先找到的摄像头 1为后找到的
+	cap = cv2.VideoCapture(1)
 	while(True):
 		# Capture frame-by-frame
 		ret, frame = cap.read()
@@ -38,7 +39,8 @@ def call_camera(img_dir):
 			break
 		elif k & 0xFF == ord('p'):
 			timestamp = get_timestamp()
-			cv2.imwrite(img_dir+timestamp+extension,frame)
+			resize_pic=cv2.resize(frame,(640,480),interpolation=cv2.INTER_CUBIC)
+			cv2.imwrite(img_dir+timestamp+extension,resize_pic)
 			print 'Have taken a photo named '+img_dir+timestamp+extension
 	# When everything done, release the capture
 	cap.release()
