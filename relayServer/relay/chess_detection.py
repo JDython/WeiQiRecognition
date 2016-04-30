@@ -10,14 +10,16 @@ import config
 def img_pre_treatment(file_path):
     im = cv2.imread(file_path)
     resize_pic=cv2.resize(im,(640,480),interpolation=cv2.INTER_CUBIC)
-    #resize_pic = im
     resize_pic = cv2.GaussianBlur(resize_pic,(5,5),0)
-    gray = cv2.cvtColor(resize_pic,cv2.COLOR_BGR2GRAY)
-    cv2.imshow('image',gray)
+    kernel = np.ones((3,3),np.uint8)
+    resize_pic = cv2.erode(resize_pic,kernel,iterations = 3)
+    resize_pic = cv2.dilate(resize_pic,kernel,iterations = 3)
+    cv2.imshow('image',resize_pic)
     k = cv2.waitKey(0) & 0xFF
     if k == 27:
         cv2.destroyAllWindows()
-    ret, binary = cv2.threshold(gray,48,255,cv2.THRESH_BINARY)
+    gray = cv2.cvtColor(resize_pic,cv2.COLOR_BGR2GRAY)
+    ret, binary = cv2.threshold(gray,70,255,cv2.THRESH_BINARY)
     cv2.imshow('image',binary)
     k = cv2.waitKey(0) & 0xFF
     if k == 27:
@@ -25,8 +27,12 @@ def img_pre_treatment(file_path):
     return resize_pic,binary
 
 def get_chessboard_lines(binary_img):
-    edges = cv2.Canny(binary_img,50,150)
-    lines_data = cv2.HoughLines(edges,1,np.pi/180,100)
+    edges = cv2.Canny(binary_img,50,120)
+    cv2.imshow('image',edges)
+    k = cv2.waitKey(0) & 0xFF
+    if k == 27:
+        cv2.destroyAllWindows()
+    lines_data = cv2.HoughLines(edges,1,np.pi/180,120)
 
     parallel_lines = []
     vertical_lines = []
@@ -101,10 +107,19 @@ def clipped_position(vertical_lines,parallel_lines):
     # print parallel_lines
     vertical_position,parallel_position = solve_position([vertical_lines[0],vertical_lines[-1]],[parallel_lines[0],parallel_lines[-1]])
     print vertical_position,parallel_position
+    # vertical_position[0][0],parallel_position[0][0] = (vertical_position[0][0]+parallel_position[0][0])/2,(vertical_position[0][0]+parallel_position[0][0])/2
+    # vertical_position[0][1],vertical_position[1][1] = (vertical_position[0][1]+vertical_position[1][1])/2,(vertical_position[0][1]+vertical_position[1][1])/2
+    # vertical_position[1][0],parallel_position[1][0] = (vertical_position[1][0]+parallel_position[1][0])/2,(vertical_position[1][0]+parallel_position[1][0])/2
+    # parallel_position[0][1],parallel_position[1][1] = (parallel_position[0][1]+parallel_position[1][1])/2,(parallel_position[0][1]+parallel_position[1][1])/2
+
+    print vertical_position,parallel_position
+
     chess_vertical_distence = abs(vertical_position[1][0] - vertical_position[0][0])/18
     chess_parallel_distence = abs(parallel_position[0][1] - vertical_position[0][1])/18
     print chess_vertical_distence,chess_parallel_distence
 
+
+    #扩展棋盘
     vertical_position[0][0] = vertical_position[0][0]-chess_vertical_distence/2
     vertical_position[0][1] = vertical_position[0][1]-chess_vertical_distence/2
     vertical_position[1][0] = vertical_position[1][0]+chess_vertical_distence/2
@@ -151,7 +166,7 @@ def save_clip_img():
 
 
 if __name__ == '__main__':
-    resize_pic,binary = img_pre_treatment('static/IMGDIR/ichessboard.jpg')
+    resize_pic,binary = img_pre_treatment('static/IMGDIR/ichessboard3.jpg')
     vertical_lines,parallel_lines=get_chessboard_lines(binary)
     vertical_position,parallel_position = clipped_position(vertical_lines,parallel_lines)
     img_perspective=save_chessboard_img(resize_pic,vertical_position,parallel_position)
