@@ -1,7 +1,9 @@
 
 
 //棋子半径为15px
-weiQiController.r = 15;
+weiQiController.r = 14;
+weiQiController.lineThick =15;
+weiQiController.blackPointR = 5;
 
 //棋盘参数 单位为px
 weiQiController.chessBoardParm = {
@@ -28,6 +30,14 @@ weiQiController.drawLine = function(ctx,x1,y1,x2,y2){
     weiQiController.board.stroke();
 }
 
+//画黑点
+weiQiController.drawBlackpoint = function(ctx,x,y,r){
+    var grd=ctx;
+    grd.beginPath();
+    grd.arc(x,y,r,0,Math.PI*2,false);
+    grd.fillStyle='#050505';
+    grd.fill();
+}
 
 //画黑子
 weiQiController.drawBlackChess = function(ctx,x,y,r){
@@ -60,21 +70,29 @@ weiQiController.drawBoard = function(){
     weiQiController.chessBoardParm['rectOrigin'][1],
     weiQiController.chessBoardParm['width'],weiQiController.chessBoardParm['height']);     //parm : 起始坐标、宽高
 
-    for(i=1;i<20;i++){
+    for(var i=1;i<20;i++){
         //画横线
         weiQiController.drawLine(weiQiController.board,
         weiQiController.chessBoardParm['rectOrigin'][0]+weiQiController.chessBoardParm['margin'],
-        2*weiQiController.r*i+weiQiController.chessBoardParm['rectOrigin'][1],
-        weiQiController.chessBoardParm['rectOrigin'][0]+19*2*weiQiController.r,
-        2*weiQiController.r*i+weiQiController.chessBoardParm['rectOrigin'][1]);
+        2*weiQiController.lineThick*i+weiQiController.chessBoardParm['rectOrigin'][1],
+        weiQiController.chessBoardParm['rectOrigin'][0]+19*2*weiQiController.lineThick,
+        2*weiQiController.lineThick*i+weiQiController.chessBoardParm['rectOrigin'][1]);
         //画竖线
         weiQiController.drawLine(weiQiController.board,
-        weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.r*i,
-        2*weiQiController.r+weiQiController.chessBoardParm['rectOrigin'][1],
-        weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.r*i,
-        19*2*weiQiController.r+weiQiController.chessBoardParm['rectOrigin'][1]);
+        weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.lineThick*i,
+        2*weiQiController.lineThick+weiQiController.chessBoardParm['rectOrigin'][1],
+        weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.lineThick*i,
+        19*2*weiQiController.lineThick+weiQiController.chessBoardParm['rectOrigin'][1]);
     }
-
+    for(var j=0;j<3;j++){
+        for(var k=0;k<3;k++){
+            weiQiController.drawBlackpoint(weiQiController.board,
+            weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.lineThick*(4+j*6),
+            2*weiQiController.lineThick*(4+k*6)+weiQiController.chessBoardParm['rectOrigin'][1],
+            weiQiController.blackPointR
+        );
+        }
+    }
 }
 
 
@@ -84,15 +102,15 @@ weiQiController.getChessPosition = function(positionArray){
         for(var x=0;x<positionArray[y].length;x++){
             if(positionArray[y][x] == 1 ){
                 weiQiController.drawBlackChess(weiQiController.board,
-                weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.r*(x+1),
-                2*weiQiController.r*(y+1)+weiQiController.chessBoardParm['rectOrigin'][1]
+                weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.lineThick*(x+1),
+                2*weiQiController.lineThick*(y+1)+weiQiController.chessBoardParm['rectOrigin'][1]
                 ,weiQiController.r);
             }
 
             if(positionArray[y][x] == 2){
                 weiQiController.drawWhiteChess(weiQiController.board,
-                weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.r*(x+1),
-                2*weiQiController.r*(y+1)+weiQiController.chessBoardParm['rectOrigin'][1]
+                weiQiController.chessBoardParm['rectOrigin'][0]+2*weiQiController.lineThick*(x+1),
+                2*weiQiController.lineThick*(y+1)+weiQiController.chessBoardParm['rectOrigin'][1]
                 ,weiQiController.r);
             }
         }
@@ -106,6 +124,7 @@ weiQiController.getRealtimeChessPosition = function(){
         url : "/relay/",
         async : false,
         success : function(data){
+            //console.log(data);
             weiQiController.drawBoard();
             weiQiController.getChessPosition(data);
         }
