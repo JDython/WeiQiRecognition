@@ -2,8 +2,6 @@
 
 import os
 import config
-
-import random
 from models import *
 from django.db.models.query import QuerySet
 
@@ -32,35 +30,30 @@ def serialize_objects(django_objects,class_models,*args):
         for django_object in django_objects:
             data_dic = {}
             for column in args:
-                data_dic[column]= eval('django_object.%s'%column)
+                data_dic[column]= str(eval('django_object.%s'%column))
             serialize_list.append(data_dic)
     if isinstance(django_objects,class_models):
         data_dic = {}
         for column in args:
-            data_dic[column]= eval('django_objects.%s'%column)
+            data_dic[column]= str(eval('django_objects.%s'%column))
+
         serialize_list.append(data_dic)
     return serialize_list
 
 
 def get_lastest_matrix():
-    lastest_matrix_object = chess_composition.objects.all()
-    return lastest_matrix_object
+    try:
+        lastest_matrix_object = chess_composition.objects.all()[0]
+    except IndexError:
+        return None
+    return serialize_objects(lastest_matrix_object,chess_composition,'id','time','matrix')
 
 
-'''
-以下为模拟棋局，仅测试使用。
-'''
-
-def dyadic_array_generator():
-    dyadic_array =[]
-    for i in range(19):
-        dyadic_array.append([ random.randint(0,2)  for j in range(19)])
-    return dyadic_array
 
 if __name__ == '__main__':
     # last_img = search_last_img()
     # print last_img
     #print dyadic_array_generator()
     lastest_matrix_object = get_lastest_matrix()
-    serialize_objects(lastest_matrix_object,'id','time','matrix')
+    serialize_objects(lastest_matrix_object,chess_composition,'id','time','matrix')
 
