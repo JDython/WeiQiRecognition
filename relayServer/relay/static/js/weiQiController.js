@@ -21,7 +21,7 @@ weiQiController.chessBoardParm = {
 $(document).ready(function(){
     weiQiController.board = $('#chessboard')[0].getContext("2d");
     weiQiController.drawBoard(); //棋盘画板
-    weiQiController.getChessPosition(weiQiController.dyadic_array);
+    weiQiController.getChessPosition(weiQiController.matrix_data[0]['matrix']);
     setInterval(weiQiController.getRealtimeChessPosition,5000);
 });
 
@@ -142,7 +142,7 @@ weiQiController.getRealtimeChessPosition = function(){
         success : function(data){
             //console.log(data);
             weiQiController.drawBoard();
-            weiQiController.getChessPosition(data);
+            weiQiController.getChessPosition(data[0]['matrix']);
         }
     });
 }
