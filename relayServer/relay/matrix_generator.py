@@ -2,7 +2,6 @@
 
 import re
 import cv2
-
 import train
 import config
 
@@ -39,14 +38,8 @@ def get_matrix():
         #     print result[i],test_filename_list[i]
     return chessboard_matrix
 
-def matrix_saver():
-    file_path='static/chessboard_position.txt'
-    print file_path
-    with open(file_path,'w') as f:
-        f.write(str(get_matrix()))
 
 
 
 if __name__ == '__main__':
-    #print get_matrix()
-    matrix_saver()
+    print get_matrix()
