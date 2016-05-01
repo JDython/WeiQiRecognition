@@ -12,7 +12,8 @@ def lineRecognizer(path):
 	:returns lines_data 识别出的直线数据；resize_pic 修改后的图片
 	'''
 	img = cv2.imread(path,cv2.IMREAD_GRAYSCALE)
-	resize_pic=cv2.resize(img,(640,480),interpolation=cv2.INTER_CUBIC)
+	resize_pic=img
+	#resize_pic=cv2.resize(img,(640,480),interpolation=cv2.INTER_CUBIC)
 	edges = cv2.Canny(resize_pic,50,150)
 	lines_data = cv2.HoughLines(edges,1,np.pi/180,150)
 	return lines_data,resize_pic

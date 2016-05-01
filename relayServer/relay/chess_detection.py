@@ -1,5 +1,8 @@
 #coding=utf-8
 
+import MySQLdb
+import datetime
+import matrix_generator
 import math
 import numpy as np
 import cv2
@@ -11,6 +14,7 @@ def img_pre_treatment(file_path):
     im = cv2.imread(file_path)
     resize_pic=cv2.resize(im,(640,480),interpolation=cv2.INTER_CUBIC)
     resize_pic = cv2.GaussianBlur(resize_pic,(5,5),0)
+    cv2.imwrite('static/InterceptedIMG/resize.jpg',resize_pic)
     kernel = np.ones((3,3),np.uint8)
     resize_pic = cv2.erode(resize_pic,kernel,iterations = 3)
     resize_pic = cv2.dilate(resize_pic,kernel,iterations = 3)
@@ -19,7 +23,7 @@ def img_pre_treatment(file_path):
     if k == 27:
         cv2.destroyAllWindows()
     gray = cv2.cvtColor(resize_pic,cv2.COLOR_BGR2GRAY)
-    ret, binary = cv2.threshold(gray,70,255,cv2.THRESH_BINARY)
+    ret, binary = cv2.threshold(gray,90,255,cv2.THRESH_BINARY)
     cv2.imshow('image',binary)
     k = cv2.waitKey(0) & 0xFF
     if k == 27:
@@ -32,7 +36,7 @@ def get_chessboard_lines(binary_img):
     k = cv2.waitKey(0) & 0xFF
     if k == 27:
         cv2.destroyAllWindows()
-    lines_data = cv2.HoughLines(edges,1,np.pi/180,120)
+    lines_data = cv2.HoughLines(edges,1,np.pi/180,110)
 
     parallel_lines = []
     vertical_lines = []
@@ -163,6 +167,28 @@ def save_clip_img():
             img_backup=cv.CloneImage(img)
             cv.SetImageROI(img_backup,(wn_position[0],wn_position[1],33,25))
             cv.SaveImage('static/ClippedImg/%d_%d.jpg'%(j,i),img_backup)
+
+def matrix_saver():
+
+
+    try:
+        conn= MySQLdb.connect(host='localhost',user='root',passwd='jiaodian',port=3306)
+        cur=conn.cursor()
+        conn.select_db('go')
+        max_id= cur.execute('select id from chess_composition')+1
+
+        matrix = matrix_generator.get_matrix()
+
+        now = datetime.datetime.now().strftime('%Y-%m-%d %I:%M:%S')
+
+        cur.execute('insert chess_composition values(%d,"%s","%s")'%(max_id,now,matrix))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except MySQLdb.Error,e:
+        print "Mysql Error %d: %s" % (e.args[0], e.args[1])
 
 
 if __name__ == '__main__':
